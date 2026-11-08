@@ -15,20 +15,25 @@ android {
         versionName = "2.0"
     }
 
-    // Sabit imza anahtari: yeni surumler eskisinin uzerine guncelleme olarak kurulur, ayarlar silinmez
+    // Imza anahtari repoda DEGIL: GitHub Secrets'tan gelir (SIGNING_KEYSTORE_B64, SIGNING_PASSWORD).
+    // Ayni anahtarla imzalandigi icin yeni surumler guncelleme olarak kurulur, ayarlar silinmez.
     signingConfigs {
-        create("toggrobot") {
-            storeFile = file("toggrobot.jks")
-            storePassword = "toggrobot"
-            keyAlias = "toggrobot"
-            keyPassword = "toggrobot"
+        create("release") {
+            val ks = System.getenv("SIGNING_KEYSTORE_FILE")
+            val pw = System.getenv("SIGNING_PASSWORD")
+            if (ks != null && pw != null) {
+                storeFile = file(ks)
+                storePassword = pw
+                keyAlias = "toggrobot"
+                keyPassword = pw
+            }
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("toggrobot")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

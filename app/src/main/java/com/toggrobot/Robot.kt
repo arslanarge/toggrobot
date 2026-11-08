@@ -26,7 +26,9 @@ data class Robot(
     /** Bu robotun Telegram bildirimleri nereye gitsin (bos = genel ayardaki sohbetler). */
     var tgChats: String = "",
 ) {
-    fun matchesProduct(p: Product) = p.collection == collection && norm(p.name) == norm(product)
+    /** Bos versiyon = bu modelin herhangi bir versiyonu. */
+    fun matchesProduct(p: Product) =
+        p.collection == collection && (product.isBlank() || norm(p.name) == norm(product))
 
     fun matches(v: Variant): Boolean = want.all { (title, allowed) ->
         allowed.isEmpty() || allowed.any { norm(it) == norm(v.choice[title] ?: "") }
@@ -81,20 +83,12 @@ data class Robot(
 
         fun newId() = "r" + System.currentTimeMillis()
 
-        /** Ilk kurulumdaki ornek robot: kullanicinin istedigi konfigurasyon. */
+        /** Ilk kurulumdaki robot: T10X'in herhangi bir versiyonu siparise acilinca haber ver. */
         fun defaultRobot() = Robot(
-            id = "r1", name = "Benim T10F'im", enabled = true,
-            collection = "t10f-configurator", product = "T10F V2 RWD Uzun Menzil",
-            want = linkedMapOf(
-                "Kış Paketi" to mutableSetOf("VAR"),
-                "Akıllı Destek Paketi" to mutableSetOf("VAR"),
-                "Renk" to mutableSetOf("kula"),
-                "Koltuklar" to mutableSetOf("seats-faux-leather-black"),
-                "Panoramik Cam Tavan" to mutableSetOf("VAR"),
-                "Meridian Premium Ses Sistemi" to mutableSetOf("YOK"),
-                "Siyah Renkte Tavan ve Yan Aynalar" to mutableSetOf("YOK"),
-            ),
-            maxPrice = 2_500_000, anyMaxPrice = 2_600_000,
+            id = "r1", name = "T10X siparişe açıldı mı", enabled = true,
+            collection = "t10x-configurator", product = "",
+            want = linkedMapOf(),
+            maxPrice = 0, anyMaxPrice = 0,
         )
     }
 }
@@ -109,12 +103,12 @@ class Settings(ctx: Context) {
 
     /** Kontrol araligi (dakika) */
     var intervalMin: Int
-        get() = prefs.getInt("intervalMin", 3)
+        get() = prefs.getInt("intervalMin", 1)
         set(v) = prefs.edit().putInt("intervalMin", v.coerceIn(1, 60)).apply()
 
     /** Gece modu: [nightStart, nightEnd) saatleri arasinda seyrek kontrol */
     var nightMode: Boolean
-        get() = prefs.getBoolean("nightMode", true)
+        get() = prefs.getBoolean("nightMode", false)
         set(v) = prefs.edit().putBoolean("nightMode", v).apply()
 
     var nightStart: Int

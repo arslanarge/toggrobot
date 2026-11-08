@@ -158,7 +158,7 @@ class MainActivity : BaseActivity() {
         }, LinearLayout.LayoutParams(dp(46), dp(46)).apply { marginEnd = dp(14) })
         val titles = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         titles.tv(r.name, 17f, bold = true)
-        titles.tv(r.product.ifEmpty { "Versiyon seçilmedi" }, 13.5f, Palette.MUTED)
+        titles.tv(r.product.ifEmpty { "Tüm versiyonlar" }, 13.5f, Palette.MUTED)
         head.addView(titles, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
         head.addView(MaterialSwitch(this).apply {
             isChecked = r.enabled
@@ -172,6 +172,7 @@ class MainActivity : BaseActivity() {
             st == null -> badge("Henüz kontrol edilmedi", Palette.MUTED, Palette.GRAY_BG)
             st.state == "match" -> badge("✓  ${st.count} uygun araç · ${Fmt.price(st.best)}", Palette.GREEN, Palette.GREEN_BG)
             st.state == "missing" -> badge("Versiyon sitede bulunamadı", Palette.RED, Palette.RED_BG)
+            st.state == "closed" -> badge("Sipariş kapalı · takipte", Palette.MUTED, Palette.GRAY_BG)
             else -> badge("Şu an uygun araç yok", Palette.MUTED, Palette.GRAY_BG)
         }
         c.addView(statusView, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = dp(16) })

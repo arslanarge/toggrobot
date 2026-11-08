@@ -47,8 +47,17 @@ object Checker {
         val lines = ArrayList<String>()
         if (error != null) lines += "⚠ $error"
         for (r in robots) {
-            val prod = products.firstOrNull { r.matchesProduct(it) }
+            val cands = products.filter { r.matchesProduct(it) }
+            val prod = cands.firstOrNull { r.fullHits(it).isNotEmpty() } ?: cands.firstOrNull()
             if (prod == null) {
+                // Modelin hic versiyonu yoksa siparis kapali demektir: bu normal durum, uyari verme.
+                if (error == null && products.none { it.collection == r.collection }) {
+                    lines += "${r.name}: sipariş kapalı (sitede versiyon yok)"
+                    RobotStatus.save(p, r.id, RobotStatus("closed", 0, 0, 0, 0, now))
+                    p.edit().putInt("miss_${r.id}", 0).putString("n_${r.id}_full_key", "").apply()
+                    Problems.clear(ctx, "miss_${r.id}")
+                    continue
+                }
                 if (error == null) {
                     lines += "${r.name}: '${r.product}' sitede bulunamadı"
                     RobotStatus.save(p, r.id, RobotStatus("missing", 0, 0, 0, 0, now))
@@ -363,6 +372,7 @@ object Heartbeat {
                     "match" -> "${st.count} uygun araç var! En ucuz ${Fmt.price(st.best)}"
                     "none" -> "uygun araç yok" + (if (st.cheapest > 0) " (versiyonun en ucuzu ${Fmt.price(st.cheapest)}, ÖTV %${st.cheapestSct})" else "")
                     "missing" -> "versiyon sitede bulunamıyor!"
+                    "closed" -> "sipariş kapalı, takip sürüyor"
                     else -> "henüz sonuç yok"
                 }
             )

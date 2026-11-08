@@ -27,7 +27,20 @@ jobs:
         with:
           gradle-version: "8.9"
 
+      - name: Imza anahtarini hazirla
+        env:
+          SIGNING_KEYSTORE_B64: ${{ secrets.SIGNING_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$SIGNING_KEYSTORE_B64" ]; then
+            echo "::error::SIGNING_KEYSTORE_B64 ve SIGNING_PASSWORD secret'lari eklenmemis (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          echo "$SIGNING_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "SIGNING_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
       - name: Derle
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true

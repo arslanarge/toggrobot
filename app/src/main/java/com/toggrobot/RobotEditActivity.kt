@@ -85,10 +85,6 @@ class RobotEditActivity : BaseActivity() {
             robot.maxPrice = maxPrice.text.toString().toLongOrNull() ?: 0
             robot.anyMaxPrice = anyPrice.text.toString().toLongOrNull() ?: 0
             robot.tgChats = tg.text.toString().trim()
-            if (robot.product.isEmpty()) {
-                toast("Önce versiyon seç")
-                return@primaryButton
-            }
             robot.want.entries.removeAll { it.value.isEmpty() }
             s.saveRobot(robot)
             toast("Kaydedildi")

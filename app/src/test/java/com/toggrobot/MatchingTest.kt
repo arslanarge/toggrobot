@@ -31,11 +31,15 @@ class MatchingTest {
         assertEquals(2, load("t10x.json", "t10x-configurator").size)
     }
 
-    @Test fun defaultRobotFindsNothingToday() {
+    @Test fun defaultRobotCatchesAnyT10X() {
         val r = Robot.defaultRobot()
-        assertTrue(r.matchesProduct(rwd))
-        assertTrue(r.fullHits(rwd).isEmpty()) // bugun Kula yok, hepsinde Meridian var
-        assertTrue(r.anyHits(rwd).isEmpty())  // en ucuz 3.13M > 2.6M
+        val t10x = load("t10x.json", "t10x-configurator")
+        // Bos versiyon = T10X'in her versiyonu eslesir, T10F eslesmez
+        assertTrue(t10x.all { r.matchesProduct(it) })
+        assertTrue(!r.matchesProduct(rwd))
+        // Secenek sarti yok: siparise acik her konfigurasyon alarm sebebi
+        t10x.forEach { assertEquals(it.variants.size, r.fullHits(it).size) }
+        assertTrue(t10x.any { r.fullHits(it).isNotEmpty() })
     }
 
     @Test fun forbiddenEquipmentExcludes() {
